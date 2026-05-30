@@ -1,0 +1,7 @@
+name: spearsbackport
+version: '${version}'
+
+main: daxz.dev.spearsbackport.Spearsbackport
+bootstrapper: daxz.dev.spearsbackport.SpearsbackportBootstrap
+api-version: '1.21.4'
+load: POSTWORLD
