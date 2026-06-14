@@ -43,19 +43,19 @@ public class SpearsAttackHandler implements Listener {
             public void run() {
                 timeout++;
 
-                if (timeout > 20) cancel();
-                if (!playersUsingSpear.contains(player.getUniqueId())) cancel();
-                if (timeout <= 1) return;
+                if (timeout > 35) cancel();
+//                if (!playersUsingSpear.contains(player.getUniqueId())) cancel();
+                if (timeout <= 2) return;
 
-                double speed = player.getVelocity().length();
+                double speed = player.getVelocity().length() * 20.0;
+                if (speed <= 5.1) return;
+
                 player.sendMessage(String.valueOf(speed));
-
-
 
             }
 
 
-        }.runTaskTimer(Spearsbackport.getInstance(), 0L, 10L);
+        }.runTaskTimer(Spearsbackport.getInstance(), 0L, 5L);
 
 
 
