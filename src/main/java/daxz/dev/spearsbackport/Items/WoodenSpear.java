@@ -1,5 +1,6 @@
 package daxz.dev.spearsbackport.Items;
 
+import daxz.dev.spearsbackport.Events.SpearsAttackHandler;
 import daxz.dev.spearsbackport.Registry.CustomItem;
 import daxz.dev.spearsbackport.Spearsbackport;
 import io.papermc.paper.datacomponent.DataComponentTypes;
@@ -21,7 +22,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
-public class WoodenSpear implements CustomItem {
+public class WoodenSpear implements SpearItem {
 
 
 
@@ -31,7 +32,11 @@ public class WoodenSpear implements CustomItem {
     }
 
     public static final WoodenSpear INSTANCE = new WoodenSpear();
-    private static NamespacedKey spearItemID = new NamespacedKey(Spearsbackport.getInstance(), "spearID");
+
+    private float jab_damage = 1f;
+    private float attackSpeed = -2.46f;
+    private float cooldown = 0.65f;
+    private double activationDelay = 0.75;
 
 
 
@@ -40,11 +45,6 @@ public class WoodenSpear implements CustomItem {
 
         Material material = Material.WOODEN_SWORD;
         ItemStack item = ItemStack.of(material);
-
-
-
-        item.setData(DataComponentTypes.CUSTOM_NAME, Component.text("Wooden Spear", NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false));
-
         //stats
         /*
             1 heart (2 dmg)
@@ -52,17 +52,30 @@ public class WoodenSpear implements CustomItem {
             0.7x charge mult
             13 tick cooldown
             4.5 block attack range
+            0.75 activation delay
         */
+
+
+
+
+        item.setData(DataComponentTypes.CUSTOM_NAME, Component.text("Wooden Spear", NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false));
+        item.setData(DataComponentTypes.CONSUMABLE, Consumable.consumable().animation(ItemUseAnimation.BRUSH).consumeSeconds(3.0f).sound(Key.key("")).hasConsumeParticles(false));
+        item.setData(DataComponentTypes.USE_COOLDOWN, UseCooldown.useCooldown(cooldown));
+
+
 
         NamespacedKey spearAttributes = new NamespacedKey(Spearsbackport.getInstance(), "spearAttributes");
 
-        item.getItemMeta().addAttributeModifier(Attribute.BLOCK_INTERACTION_RANGE, new AttributeModifier(spearAttributes, 2.0, AttributeModifier.Operation.ADD_NUMBER));
-        item.getItemMeta().addAttributeModifier(Attribute.ENTITY_INTERACTION_RANGE, new AttributeModifier(spearAttributes, 2.0, AttributeModifier.Operation.ADD_NUMBER));
-
+        item.editMeta(meta -> {
+            meta.addAttributeModifier(Attribute.BLOCK_INTERACTION_RANGE, new AttributeModifier(spearAttributes, 0.5, AttributeModifier.Operation.ADD_NUMBER));
+            meta.addAttributeModifier(Attribute.ENTITY_INTERACTION_RANGE, new AttributeModifier(spearAttributes, 0.5, AttributeModifier.Operation.ADD_NUMBER));
+            meta.addAttributeModifier(Attribute.ATTACK_SPEED, new AttributeModifier(spearAttributes, attackSpeed, AttributeModifier.Operation.ADD_NUMBER));
+            meta.addAttributeModifier(Attribute.ATTACK_DAMAGE, new AttributeModifier(spearAttributes, jab_damage, AttributeModifier.Operation.ADD_NUMBER));
+        });
 
 
         item.editPersistentDataContainer(pdc -> {
-            pdc.set(spearItemID, PersistentDataType.STRING, getID());
+            pdc.set(SpearsAttackHandler.spearItemID, PersistentDataType.STRING, getID());
         });
 
 
@@ -72,5 +85,10 @@ public class WoodenSpear implements CustomItem {
     @Override
     public @Nullable ShapedRecipe getRecipe() {
         return null;
+    }
+
+    @Override
+    public double getCooldown() {
+        return cooldown;
     }
 }

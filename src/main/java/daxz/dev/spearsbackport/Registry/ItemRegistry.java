@@ -34,6 +34,10 @@ public class ItemRegistry {
         return item != null ? item.createItem() : null;
     }
 
+    public static CustomItem getCustomItem(String id) {
+        return REGISTRY.get(id);
+    }
+
     public static boolean giveItem(Player player, String id) {
         CustomItem item = REGISTRY.get(id);
         if (item != null) {

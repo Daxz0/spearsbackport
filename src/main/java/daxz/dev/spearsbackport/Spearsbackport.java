@@ -2,6 +2,7 @@ package daxz.dev.spearsbackport;
 
 import daxz.dev.spearsbackport.Commands.CommandHandler;
 import daxz.dev.spearsbackport.Registry.EventRegister;
+import daxz.dev.spearsbackport.Registry.ItemRegistry;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -16,6 +17,7 @@ public final class Spearsbackport extends JavaPlugin {
 
         instance = this;
         EventRegister.registerEvents();
+        ItemRegistry.registerItems();
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands -> {
             commands.registrar().register(CommandHandler.spears());
         });
