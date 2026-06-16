@@ -4,6 +4,8 @@ import daxz.dev.spearsbackport.Items.SpearItem;
 import daxz.dev.spearsbackport.Registry.CustomItem;
 import daxz.dev.spearsbackport.Registry.ItemRegistry;
 import daxz.dev.spearsbackport.Spearsbackport;
+import io.papermc.paper.event.player.PlayerStopUsingItemEvent;
+import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -38,17 +40,26 @@ public class SpearsAttackHandler implements Listener {
         new BukkitRunnable() {
 
             int timeout = 0;
+            int stopTimeout = 0;
 
             @Override
             public void run() {
                 timeout++;
 
                 if (timeout > 35) cancel();
-//                if (!playersUsingSpear.contains(player.getUniqueId())) cancel();
+                if (!playersUsingSpear.contains(player.getUniqueId())){
+                    stopTimeout++;
+                    player.sendMessage("yo yo yo");
+                    if (stopTimeout > 5) cancel();
+                    return;
+                }
                 if (timeout <= 2) return;
 
                 double speed = player.getVelocity().length() * 20.0;
                 if (speed <= 5.1) return;
+
+
+
 
                 player.sendMessage(String.valueOf(speed));
 
@@ -63,20 +74,14 @@ public class SpearsAttackHandler implements Listener {
     }
 
     @EventHandler
-    public void playerStopsCharge(PlayerInteractEvent event) {
-
-        ItemStack item = event.getPlayer().getInventory().getItemInMainHand();
+    public void wateringCanCancelled(PlayerStopUsingItemEvent event) {
+        ItemStack item = event.getItem();
         if (item == null) return;
-        String itemID = item.getItemMeta().getPersistentDataContainer().get(spearItemID, PersistentDataType.STRING);
-        if (itemID == null) return;
+        if (item.getItemMeta().getPersistentDataContainer().get(spearItemID, PersistentDataType.STRING) == null) return;
 
         Player player = event.getPlayer();
-
-        CustomItem registeredItem = ItemRegistry.getCustomItem(itemID);
-        if (registeredItem instanceof SpearItem spear){
-            playersUsingSpear.remove(player.getUniqueId());
-            player.setCooldown(item.getType(), (int) spear.getCooldown());
-        }
+        playersUsingSpear.remove(player.getUniqueId());
+        player.setCooldown(item.getType(), 10);
 
     }
 
