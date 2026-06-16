@@ -5,7 +5,9 @@ import daxz.dev.spearsbackport.Registry.CustomItem;
 import daxz.dev.spearsbackport.Registry.ItemRegistry;
 import daxz.dev.spearsbackport.Spearsbackport;
 import io.papermc.paper.event.player.PlayerStopUsingItemEvent;
+import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -56,38 +58,43 @@ public class SpearsAttackHandler implements Listener {
 
             int timeout = 0;
             int stopTimeout = 0;
+            org.bukkit.Location lastLocation = player.getLocation();
 
             @Override
             public void run() {
                 timeout++;
 
-                if (timeout > 35) cancel();
-                if (!playersUsingSpear.contains(player.getUniqueId())){
+                if (timeout > 35) { cancel(); return; }
+                if (!playersUsingSpear.contains(player.getUniqueId())) {
                     stopTimeout++;
                     if (stopTimeout > 5) cancel();
                     return;
                 }
-                if (timeout <= 2) return;
-
-
-                double speed = player.getVelocity().length() * 20.0;
-                if (player.getVehicle() != null){
-                    Entity vehicle = player.getVehicle();
-                    speed = vehicle.getVelocity().length() * 20.0;
+                if (timeout <= 2) {
+                    lastLocation = player.getLocation();
+                    return;
                 }
+
+                Location currentLocation = player.getLocation();
+                if (player.getVehicle() != null) {
+                    currentLocation = player.getVehicle().getLocation();
+                }
+
+                double speed = lastLocation.distance(currentLocation) * 20.0;
+                lastLocation = currentLocation;
+
                 if (speed <= 5.1) return;
 
-
-                for (Entity entity : player.getNearbyEntities(1, 1.5, 1)) {
+                for (Entity entity : player.getLocation().add(player.getLocation().getDirection().normalize().multiply(0.5)).getNearbyEntities(0.5, 1, 0.5)) {
+                    if (player.getVehicle() != null) {
+                        if (entity instanceof LivingEntity horse) {
+                            if (horse == player.getVehicle()) continue;
+                        }
+                    }
                     if (!(entity instanceof LivingEntity nearby)) continue;
                     nearby.damage(speed * registered.getMult());
                 }
-
-
-
-
             }
-
 
         }.runTaskTimer(Spearsbackport.getInstance(), 0L, 5L);
 
