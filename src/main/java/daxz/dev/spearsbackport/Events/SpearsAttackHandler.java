@@ -85,14 +85,22 @@ public class SpearsAttackHandler implements Listener {
 
                 if (speed <= 5.1) return;
 
-                for (Entity entity : player.getLocation().add(player.getLocation().getDirection().normalize().multiply(0.5)).getNearbyEntities(0.5, 1, 0.5)) {
+                for (Entity entity : player.getLocation().add(player.getLocation().getDirection().normalize().multiply(1.5)).getNearbyEntities(0.8, 1, 0.8)) {
                     if (player.getVehicle() != null) {
                         if (entity instanceof LivingEntity horse) {
                             if (horse == player.getVehicle()) continue;
                         }
                     }
                     if (!(entity instanceof LivingEntity nearby)) continue;
-                    nearby.damage(speed * registered.getMult());
+                    assert registered != null;
+                    nearby.damage(speed * registered.getMult(), player);
+                    Vector knockback = nearby.getLocation().toVector()
+                            .subtract(player.getLocation().toVector())
+                            .normalize()
+                            .multiply(1.5);
+
+                    knockback.setY(0.4);
+                    nearby.setVelocity(knockback);
                 }
             }
 
