@@ -7,10 +7,13 @@ import daxz.dev.spearsbackport.Spearsbackport;
 import io.papermc.paper.event.player.PlayerStopUsingItemEvent;
 import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -26,9 +29,19 @@ public class SpearsAttackHandler implements Listener {
     private static List<UUID> playersUsingSpear = new ArrayList<>();
 
     @EventHandler
+    public void stopSpearConsume(PlayerItemConsumeEvent event) {
+        ItemStack item = event.getItem();
+        Player player = event.getPlayer();
+        if (item == null) return;
+        if (item.getItemMeta().getPersistentDataContainer().get(spearItemID, PersistentDataType.STRING) == null) return;
+        event.setCancelled(true);
+
+    }
+
+    @EventHandler
     public void playerInteractsUsingSpear(PlayerInteractEvent event) {
 
-        ItemStack item = event.getPlayer().getInventory().getItemInMainHand();
+        ItemStack item = event.getItem();
 
         Player player = event.getPlayer();
         if (playersUsingSpear.contains(player.getUniqueId())) return;
@@ -36,6 +49,8 @@ public class SpearsAttackHandler implements Listener {
         if (item.getItemMeta().getPersistentDataContainer().get(spearItemID, PersistentDataType.STRING) == null) return;
 
         playersUsingSpear.add(player.getUniqueId());
+
+        SpearItem registered = ItemRegistry.getSpear(item.getItemMeta().getPersistentDataContainer().get(spearItemID, PersistentDataType.STRING));
 
         new BukkitRunnable() {
 
@@ -49,19 +64,27 @@ public class SpearsAttackHandler implements Listener {
                 if (timeout > 35) cancel();
                 if (!playersUsingSpear.contains(player.getUniqueId())){
                     stopTimeout++;
-                    player.sendMessage("yo yo yo");
                     if (stopTimeout > 5) cancel();
                     return;
                 }
                 if (timeout <= 2) return;
 
+
                 double speed = player.getVelocity().length() * 20.0;
+                if (player.getVehicle() != null){
+                    Entity vehicle = player.getVehicle();
+                    speed = vehicle.getVelocity().length() * 20.0;
+                }
                 if (speed <= 5.1) return;
 
 
+                for (Entity entity : player.getNearbyEntities(1, 1.5, 1)) {
+                    if (!(entity instanceof LivingEntity nearby)) continue;
+                    nearby.damage(speed * registered.getMult());
+                }
 
 
-                player.sendMessage(String.valueOf(speed));
+
 
             }
 
@@ -81,7 +104,7 @@ public class SpearsAttackHandler implements Listener {
 
         Player player = event.getPlayer();
         playersUsingSpear.remove(player.getUniqueId());
-        player.setCooldown(item.getType(), 10);
+        player.setCooldown(item.getType(), 13);
 
     }
 

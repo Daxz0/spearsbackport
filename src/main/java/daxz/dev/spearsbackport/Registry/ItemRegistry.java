@@ -2,6 +2,7 @@ package daxz.dev.spearsbackport.Registry;
 
 
 
+import daxz.dev.spearsbackport.Items.SpearItem;
 import daxz.dev.spearsbackport.Items.WoodenSpear;
 import daxz.dev.spearsbackport.Spearsbackport;
 import org.bukkit.entity.Player;
@@ -36,6 +37,11 @@ public class ItemRegistry {
 
     public static CustomItem getCustomItem(String id) {
         return REGISTRY.get(id);
+    }
+
+    public static SpearItem getSpear(String id) {
+        CustomItem item = REGISTRY.get(id);
+        return item instanceof SpearItem spear ? spear : null;
     }
 
     public static boolean giveItem(Player player, String id) {

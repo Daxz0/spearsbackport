@@ -37,6 +37,7 @@ public class WoodenSpear implements SpearItem {
     private float attackSpeed = -2.46f;
     private float cooldown = 0.65f;
     private double activationDelay = 0.75;
+    private double mult = 0.7;
 
 
 
@@ -91,4 +92,11 @@ public class WoodenSpear implements SpearItem {
     public double getCooldown() {
         return cooldown;
     }
+
+    @Override
+    public double getMult() {
+        return mult;
+    }
+
+
 }
