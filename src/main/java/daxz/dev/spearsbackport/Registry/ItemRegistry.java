@@ -2,8 +2,7 @@ package daxz.dev.spearsbackport.Registry;
 
 
 
-import daxz.dev.spearsbackport.Items.SpearItem;
-import daxz.dev.spearsbackport.Items.WoodenSpear;
+import daxz.dev.spearsbackport.Items.*;
 import daxz.dev.spearsbackport.Spearsbackport;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -17,6 +16,11 @@ public class ItemRegistry {
     public static void registerItems() {
 
         register(WoodenSpear.INSTANCE);
+        register(StoneSpear.INSTANCE);
+        register(IronSpear.INSTANCE);
+        register(GoldenSpear.INSTANCE);
+        register(DiamondSpear.INSTANCE);
+        register(NetheriteSpear.INSTANCE);
 
     }
 

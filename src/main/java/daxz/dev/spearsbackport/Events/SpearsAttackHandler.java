@@ -21,14 +21,13 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class SpearsAttackHandler implements Listener {
 
     public static NamespacedKey spearItemID = new NamespacedKey(Spearsbackport.getInstance(), "spearID");
     private static List<UUID> playersUsingSpear = new ArrayList<>();
+    private static Map<UUID, Float> originalSpeeds = new HashMap<>();
 
     @EventHandler
     public void stopSpearConsume(PlayerItemConsumeEvent event) {
@@ -53,6 +52,9 @@ public class SpearsAttackHandler implements Listener {
         playersUsingSpear.add(player.getUniqueId());
 
         SpearItem registered = ItemRegistry.getSpear(item.getItemMeta().getPersistentDataContainer().get(spearItemID, PersistentDataType.STRING));
+
+        originalSpeeds.put(player.getUniqueId(), player.getWalkSpeed());
+        player.sendMessage(String.valueOf(player.getWalkSpeed()));
 
         new BukkitRunnable() {
 
@@ -80,27 +82,35 @@ public class SpearsAttackHandler implements Listener {
                     currentLocation = player.getVehicle().getLocation();
                 }
 
-                double speed = lastLocation.distance(currentLocation) * 20.0;
+
+
+                double speed = lastLocation.distance(currentLocation) * 1.2;
                 lastLocation = currentLocation;
 
                 if (speed <= 5.1) return;
 
-                for (Entity entity : player.getLocation().add(player.getLocation().getDirection().normalize().multiply(1.5)).getNearbyEntities(0.8, 1, 0.8)) {
+                for (Entity entity : player.getLocation().add(player.getLocation().getDirection().normalize().multiply(1.5)).getNearbyEntities(1.8, 1.3, 1.8)) {
                     if (player.getVehicle() != null) {
                         if (entity instanceof LivingEntity horse) {
                             if (horse == player.getVehicle()) continue;
                         }
                     }
+                    if (entity == player) continue;
                     if (!(entity instanceof LivingEntity nearby)) continue;
                     assert registered != null;
                     nearby.damage(speed * registered.getMult(), player);
                     Vector knockback = nearby.getLocation().toVector()
-                            .subtract(player.getLocation().toVector())
-                            .normalize()
-                            .multiply(1.5);
+                            .subtract(player.getLocation().toVector());
+
+                    if (knockback.lengthSquared() == 0) {
+                        knockback = new Vector(0, 0, 0);
+                    } else {
+                        knockback.normalize().multiply(1.5);
+                    }
 
                     knockback.setY(0.4);
                     nearby.setVelocity(knockback);
+
                 }
             }
 
@@ -112,13 +122,16 @@ public class SpearsAttackHandler implements Listener {
     }
 
     @EventHandler
-    public void wateringCanCancelled(PlayerStopUsingItemEvent event) {
+    public void spearCancelled(PlayerStopUsingItemEvent event) {
         ItemStack item = event.getItem();
         if (item == null) return;
         if (item.getItemMeta().getPersistentDataContainer().get(spearItemID, PersistentDataType.STRING) == null) return;
 
         Player player = event.getPlayer();
         playersUsingSpear.remove(player.getUniqueId());
+        float original = originalSpeeds.getOrDefault(player.getUniqueId(), 0.2f);
+        player.setWalkSpeed(original);
+        originalSpeeds.remove(player.getUniqueId());
         player.setCooldown(item.getType(), 13);
 
     }
